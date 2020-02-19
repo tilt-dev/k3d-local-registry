@@ -69,6 +69,6 @@ refer to the image as `my-image`, and Tilt will take care of prepending `localho
 
 ## License
 
-Copyright 2019 Windmill Engineering
+Copyright 2020 Windmill Engineering
 
 Licensed under [the Apache License, Version 2.0](LICENSE)
