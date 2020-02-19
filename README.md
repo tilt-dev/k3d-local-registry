@@ -1,4 +1,4 @@
-# k3s-local-registry
+# k3d-local-registry
 When using Tilt with a [k3s](https://k3s.io/) cluster, we recommend using a local registry for faster image pushing and pulling.
 
 This repo provides a script to help you set up your cluster (via [k3d](https://github.com/rancher/k3d/))
@@ -9,12 +9,12 @@ and Tilt knows where to push/pull your images to/from.
 
 1) Install [k3d](https://github.com/rancher/k3d/) (note: these instructions require **k3d v1.x**)
 
-2) Copy the [k3S-with-registry.sh](k3S-with-registry.sh) script somewhere on your path.
+2) Copy the [k3d-with-registry.sh](k3d-with-registry.sh) script somewhere on your path.
 
-3) Create a cluster with `kind-with-registry.sh`. Currently it uses the default registry name `registry.local` and default port `5000`.
+3) Create a cluster with `k3d-with-registry.sh`. Currently it uses the default registry name `registry.local` and default port `5000`.
 
 ```
-k3s-with-registry.sh
+k3d-with-registry.sh
 ```
 
 4) Verify your registry:
@@ -56,7 +56,7 @@ EOF
 
 Verify the pod spun up correct with: `kubectl get pods -l "app=nginx-test-registry"`
 
-Congrats! You can now use the image name `registry:5000/alpine` in any resources you deploy to the Kind cluster.
+Congrats! You can now push images to `localhost:5000/xxx`, and reference them in your k8s YAML as `registry.local:5000/xxx`.
 
 [Tilt](https://tilt.dev) will automatically detect the local registry created by this script,
 and do the image tagging dance (as of Tilt v0.12.0). In your Tiltfle and in your K8s YAML, just
@@ -65,7 +65,7 @@ refer to the image as `my-image`, and Tilt will take care of prepending `localho
 ## See also
 
 * More info on [using registries with k3d](https://github.com/rancher/k3d/blob/master/docs/registries.md)
-* The [Tilt + local registries guide for Kind](https://github.com/windmilleng/kind-local)
+* The [Tilt + local registries guide for Kind](https://github.com/windmilleng/kind-local), which employs a similar pattern
 
 ## License
 
