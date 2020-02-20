@@ -18,18 +18,22 @@ CLUSTER_NAME="${CLUSTER_NAME:-k3s-default}"
 # Check if cluster already exists.
 # AFAICT there's no good way to get the registry name/port from a running
 # cluster, so if it already exists, just bail.
-for cluster in $(k3d ls | tail -n +4 | head -n -1 | awk '{print $2}'); do
+for cluster in $(k3d ls 2>/dev/null | tail -n +4 | head -n -1 | awk '{print $2}'); do
   if [ "$cluster" == "$CLUSTER_NAME" ]; then
-      # TODO(maia): check if already annotated
+      # TODO(maia): check if the cluster already has the appropriate annotations--then we're okay
+      # TODO(maia): if cluster exists, has registry, doesn't have annotations, apply them.
+      #   (Unfortunately there's no easy way to check what registristry (if any) the cluster
+      #   is running, see https://github.com/rancher/k3d/issues/193)
       echo "Cluster '$cluster' already exists, aborting script."
       echo "\t(You can delete the cluster with 'k3d delete --name=$CLUSTER_NAME' and rerun this script.)"
       exit 1
   fi
 done
 
-k3d create --enable-registry${NAME_FLAG} "$@"
+k3d create --enable-registry --name=${CLUSTER_NAME} "$@"
 
-echo "Waiting for Kubeconfig to be ready"
+echo
+echo "Waiting for Kubeconfig to be ready..."
 timeout=$(($(date +%s) + 30))
 until [[ $(date +%s) -gt $timeout ]]; do
   if k3d get-kubeconfig --name=${CLUSTER_NAME} > /dev/null 2>&1; then
@@ -51,10 +55,27 @@ reg_name='registry.local'
 reg_port='5000'
 
 # Annotate nodes with registry info for Tilt to auto-detect
-for node in $(kubectl get nodes -o go-template --template='{{range .items}}{{printf "%s\n" .metadata.name}}{{end}}'); do
-  kubectl annotate node "${node}" \
-          tilt.dev/registry=localhost:${reg_port} \
-          tilt.dev/registry-from-cluster={reg_name}:${reg_port}
+echo "Waiting for node(s) + annotating with registry info..."
+DONE=""
+timeout=$(($(date +%s) + 30))
+until [[ $(date +%s) -gt $timeout ]]; do
+  nodes=$(kubectl get nodes -o go-template --template='{{range .items}}{{printf "%s\n" .metadata.name}}{{end}}')
+  if [ ! -z $nodes ]; then
+    for node in $nodes; do
+      kubectl annotate node "${node}" \
+              tilt.dev/registry=localhost:${reg_port} \
+              tilt.dev/registry-from-cluster=${reg_name}:${reg_port}
+    done
+    DONE=true
+    break
+  fi
+  sleep 0.2
 done
 
-echo Set kubecontext with: export KUBECONFIG=\"\$\(k3d get-kubeconfig --name=${CLUSTER_NAME}\)\"
+if [ -z "$DONE" ]; then
+  echo "Timed out waiting for node(s) to be up"
+  exit 1
+fi
+
+echo "Set kubecontext with:"
+echo "\texport KUBECONFIG=\"\$(k3d get-kubeconfig --name=${CLUSTER_NAME})\""
