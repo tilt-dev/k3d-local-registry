@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/usr/bin/env bash
 #
 # Starts a k3s cluster (via k3d) with local image registry enabled,
 # and with nodes annotated such that Tilt (https://tilt.dev/) can
