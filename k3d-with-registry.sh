@@ -6,14 +6,55 @@
 
 set -o errexit
 
+
+
+# format host:port
+# Example: PUBLISH_PORTS='80:80 443:443'
+PUBLISH_PORTS=''
+
+
+API_SERVER_PORT="${API_SERVER_PORT:-6443}"
+
+# desired cluster name (default is "k3s-default")
+CLUSTER_NAME="${CLUSTER_NAME:-k3s-default}"
+
+
+
+function to_int {
+    local -i _num="10#${1}"
+    echo "${_num}"
+}
+
+function port_is_ok {
+    local _host=`echo "$1" | cut -d ":" -f 1`
+    local _port=`echo "$1" | cut -d ":" -f 2`
+    local -i _port_num_host=$(to_int "${_host}" 2>/dev/null)
+    local -i _port_num_port=$(to_int "${_port}" 2>/dev/null)
+
+    if (( (( $_port_num_host < 1 || $_port_num_host > 65535 )) || (( $_port_num_port < 1 || $_port_num_port > 65535 )) ))  ; then
+        echo "*** ${_host}:${_port} is not a valid port for publish" 1>&2
+        exit 1
+    fi
+
+    echo "${_port}"
+}
+
+
+# concat ports
+PUBLISH=""
+for PORT in $PUBLISH_PORTS;do
+        result=$(port_is_ok $PORT)
+        PUBLISH="${PUBLISH} --publish $PORT"
+done
+
+
+
 # 🚨 only compatible with k3d v1.x (at least for now) 🚨
 if ! k3d -version | grep 'v1' > /dev/null 2>&1; then
   echo "This script only works with k3d v1.x"
   exit 1
 fi
 
-# desired cluster name (default is "k3s-default")
-CLUSTER_NAME="${CLUSTER_NAME:-k3s-default}"
 
 # Check if cluster already exists.
 # AFAICT there's no good way to get the registry name/port from a running
@@ -30,7 +71,7 @@ for cluster in $(k3d ls 2>/dev/null | tail -n +4 | head -n -1 | awk '{print $2}'
   fi
 done
 
-k3d create --enable-registry --name=${CLUSTER_NAME} "$@"
+k3d create --enable-registry --name=${CLUSTER_NAME} --api-port ${API_SERVER_PORT}  ${PUBLISH} "$@"
 
 echo
 echo "Waiting for Kubeconfig to be ready..."
