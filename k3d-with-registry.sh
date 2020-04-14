@@ -12,12 +12,12 @@ set -o errexit
 # Example: PUBLISH_PORTS='80:80 443:443'
 PUBLISH_PORTS=''
 
-
 API_SERVER_PORT="${API_SERVER_PORT:-6443}"
 
 # desired cluster name (default is "k3s-default")
 CLUSTER_NAME="${CLUSTER_NAME:-k3s-default}"
 
+REQ='docker kubectl k3d'
 
 
 function to_int {
@@ -39,7 +39,6 @@ function port_is_ok {
     echo "${_port}"
 }
 
-
 # concat ports
 PUBLISH=""
 for PORT in $PUBLISH_PORTS;do
@@ -49,11 +48,16 @@ done
 
 
 
+# check req
+for _req in $REQ;do
+	hash $_req 2>/dev/null || { echo >&2 "I require $_req but it's not installed.  Aborting."; exit 1; }
+done
 # 🚨 only compatible with k3d v1.x (at least for now) 🚨
 if ! k3d -version | grep 'v1' > /dev/null 2>&1; then
   echo "This script only works with k3d v1.x"
   exit 1
 fi
+
 
 
 # Check if cluster already exists.
