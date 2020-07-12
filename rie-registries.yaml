@@ -1,0 +1,4 @@
+mirrors:
+  "registry.localhost:5018":
+    endpoint:
+      - http://registry.localhost:5000

@@ -30,7 +30,7 @@ for cluster in $(k3d ls 2>/dev/null | tail -n +4 | head -n -1 | awk '{print $2}'
   fi
 done
 
-k3d create --enable-registry --name=${CLUSTER_NAME} "$@"
+k3d create --volume $(pwd)/rie-registries.yaml:/etc/rancher/k3s/registries.yaml --name=${CLUSTER_NAME} "$@"
 
 echo
 echo "Waiting for Kubeconfig to be ready..."
@@ -51,8 +51,8 @@ fi
 
 # default name/port
 # TODO(maia): support other names/ports
-reg_name='registry.local'
-reg_port='5000'
+reg_name='registry.localhost'
+reg_port='5018'
 
 # Annotate nodes with registry info for Tilt to auto-detect
 echo "Waiting for node(s) + annotating with registry info..."
