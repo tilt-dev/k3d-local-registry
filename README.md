@@ -5,6 +5,17 @@ This repo provides a script to help you set up your cluster (via [k3d](https://g
 with a local image registry that Tilt can auto-detect, so you don't need to do any additional configuration,
 and Tilt knows where to push/pull your images to/from.
 
+## UPDATE
+
+k3d v4.0 has a built-in local registry! If you're able to upgrade to v4.0, we
+strongly recommend you use the built-in registry. You will no longer need this
+script.
+
+[K3d Local Registry Instructions](https://k3d.io/usage/guides/registries/#using-a-local-registry)
+
+Tilt-team has worked with K3d team to ensure that the built-in registry supports all the same
+auto-discovery features as this script.
+
 ## How to Try It
 
 1) Install [k3d](https://github.com/rancher/k3d/) (note: these instructions require **k3d v1.x**)
