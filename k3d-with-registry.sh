@@ -7,8 +7,8 @@
 set -o errexit
 
 # 🚨 only compatible with k3d v1.x (at least for now) 🚨
-if ! k3d -version | grep 'v1' > /dev/null 2>&1; then
-  echo "This script only works with k3d v1.x"
+if k3d --version | grep 'v1' > /dev/null 2>&1; then
+  echo "This script does not works with k3d v1.x"
   exit 1
 fi
 
@@ -30,7 +30,7 @@ for cluster in $(k3d ls 2>/dev/null | tail -n +4 | head -n -1 | awk '{print $2}'
   fi
 done
 
-k3d create --enable-registry --name=${CLUSTER_NAME} "$@"
+k3d cluster create --registry-create ${CLUSTER_NAME} "$@"
 
 echo
 echo "Waiting for Kubeconfig to be ready..."
