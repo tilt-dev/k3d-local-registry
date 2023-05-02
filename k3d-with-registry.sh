@@ -6,7 +6,7 @@
 
 set -o errexit
 
-# 🚨 only compatible with k3d v1.x (at least for now) 🚨
+# 🚨 does not compatible with k3d v1.x (at least for now) 🚨
 if k3d --version | grep 'v1' > /dev/null 2>&1; then
   echo "This script does not works with k3d v1.x"
   exit 1
