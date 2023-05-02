@@ -1,20 +1,28 @@
 # k3d-local-registry
+
+## UPDATE(2023-05-02)
+
+As of k3d v4.0, k3d has a built-in local registry. 
+
+Tilt-team has worked with K3d team to ensure that the built-in registry supports all the same
+auto-discovery features as this script. You no longer need this script.
+
+For instructions, see [Using a Local Registry](https://k3d.io/v5.4.9/usage/registries/#using-a-local-registry).
+
+We can also use [ctlptl](http://github.com/tilt-dev/ctlptl), which implements a more declarative
+approach to setting up local clusters.
+
+This repo will be archived for posterity.
+
+---
+
+## Why
+
 When using Tilt with a [k3s](https://k3s.io/) cluster, we recommend using a local registry for faster image pushing and pulling.
 
 This repo provides a script to help you set up your cluster (via [k3d](https://github.com/rancher/k3d/))
 with a local image registry that Tilt can auto-detect, so you don't need to do any additional configuration,
 and Tilt knows where to push/pull your images to/from.
-
-## UPDATE
-
-k3d v4.0 has a built-in local registry! If you're able to upgrade to v4.0, we
-strongly recommend you use the built-in registry. You will no longer need this
-script.
-
-[K3d Local Registry Instructions](https://k3d.io/usage/guides/registries/#using-a-local-registry)
-
-Tilt-team has worked with K3d team to ensure that the built-in registry supports all the same
-auto-discovery features as this script.
 
 ## How to Try It
 
